@@ -67,6 +67,8 @@ Now you can prove properties of your model!
 Look at the lemmas that are commented out in the skeleton file.
 Do you expect them to hold for the protocol specification above?
 
+- We expect all of the lemmas to hold since, under the protocol, an adversary should not be able to learn the shared key or the secret message. Indeed, all of the lemmas do hold.
+
 Comment them out and try proving them!
 Discuss your results with your peers.
 
