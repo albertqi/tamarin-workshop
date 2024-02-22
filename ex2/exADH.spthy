@@ -4,47 +4,40 @@ begin
 builtins: symmetric-encryption, diffie-hellman
 
 rule Ltk:
-  // let publicComponent = _^_ in
-  []
+  let publicComponent = 'g'^~sk in
+  [ Fr(~sk) ]
   -->
-  []
+  [ !PrivateKey($A, ~sk), !PublicKey($A, publicComponent),
+    Out(publicComponent) ]
 
 rule A_Init:
-  []
+  [ !PublicKey($A, keyA) ]
   --[ ReachAInit() ]->
-  [ // Out(...)
-  // , St_A(...)
-  ]
+  [ St_A($A, $B),
+    Out(<$A, $B, keyA>) ]
 
 rule B_Init:
-  // let sharedKey = _^_ in
-  [ // In(...)
-  ]
-  --[ ReachBInit()
-    // , ResponderKey(_)
-    ]->
-  [ // Out(...)
-  ]
+  let sharedKey = keyA^~sk in
+  [ !PrivateKey($B, ~sk), !PublicKey($A, keyA), !PublicKey($B, keyB), St_A($A, $B),
+    In(<$A, $B, keyA>) ]
+  --[ ReachBInit(), ResponderKey(sharedKey) ]->
+  [ Out(<senc('ack', sharedKey), $A, $B, keyB>) ]
 
 rule A_SendMsg:
-  // let sharedKey = _^_ in
-  [ // In(...)
-  // , St_A(...)
-  ]
-  --[ ReachASendMsg()
-    // MessageWasSent(_)
-    // , InitiatorKey(_)
-    ]->
-  [ // Out(...)
-  ]
+  let sharedKey = keyB^~sk in
+  [ Fr(~m), !PrivateKey($A, ~sk), !PublicKey($B, keyB), St_A($A, $B),
+    In(<ack, $A, $B, keyB>) ]
+  --[ ReachASendMsg(), MessageWasSent(~m), InitiatorKey(sharedKey),
+      Eq(senc('ack', sharedKey), ack) ]->
+  [ Out(senc(~m, sharedKey)) ]
 
 // This restriction allows you to use the Eq action fact in rules to constrain
 // that two terms must be equal. This is used to "compare" two messages or
 // terms, e.g., to check that signature verification is equal to true.
 // This rule is only commented out right now to suppress a warning that Eq is
 // referenced but not used. Un-comment it whenever you want!
-// restriction Eq:
-//   "All t1 t2 #x. Eq(t1, t2) @ #x ==> t1 = t2"
+restriction Eq:
+  "All t1 t2 #x. Eq(t1, t2) @ #x ==> t1 = t2"
 
 lemma Executability:
   exists-trace
@@ -52,13 +45,13 @@ lemma Executability:
 
 // K(m) @ #t means that the adversary knows message m at timepoint #t.
 // Again, the following lemmas are commented out to suppress warnings.
-// lemma ResponderKeySecrecy:
-//   "All k #t. ResponderKey(k) @ #t ==> not Ex #x. K(k) @ #x"
+lemma ResponderKeySecrecy:
+  "All k #t. ResponderKey(k) @ #t ==> not Ex #x. K(k) @ #x"
 
-// lemma InitiatorKeySecrecy:
-//   "All k #t. InitiatorKey(k) @ #t ==> not Ex #x. K(k) @ #x"
+lemma InitiatorKeySecrecy:
+  "All k #t. InitiatorKey(k) @ #t ==> not Ex #x. K(k) @ #x"
 
-// lemma SendMsgSecrecy:
-//   "All m #t. MessageWasSent(m) @ #t ==> not Ex #x. K(m) @ #x"
+lemma SendMsgSecrecy:
+  "All m #t. MessageWasSent(m) @ #t ==> not Ex #x. K(m) @ #x"
 
 end
