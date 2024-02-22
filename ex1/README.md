@@ -35,6 +35,8 @@ Once you have implemented the rule, load the interactive mode of Tamarin and try
 Does it hold?
 What would you expect?
 
+- Yes, the `Secrecy` lemma does hold. This is exactly what we would expect since we do not leak the message or the secret key.
+
 ## Step 2
 
 It is a common modelling pattern in Tamarin to include a rule that leaks a participant's key.
@@ -49,6 +51,8 @@ Given that the participants key leaked, the adversary should now be able to lear
 Tamarin gives you a graphical output when it finds an attack.
 Try relating this output to you model.
 Can you make sense of it?
+
+- The graphical output makes sense, as it relates the `Leak` rule to the `SendMsg` rule, depicting how an adversary could now learn the message.
 
 ## Step 3
 
@@ -65,3 +69,5 @@ Which result would you expect?
 Should you see an error that involves the word "guardedness," your lemma is not of the form that Tamarin expects.
 For many participants in this exercise, it is sufficient to be more explicit about your parentheses.
 If this is not enough, please raise your hand during the workshop or read the [full documentation on guardedness](https://tamarin-prover.github.io/manual/master/book/007_property-specification.html#guardedness).
+
+- We expect the `SecrecyWeakened` lemma to hold since the only way an adversary can learn the message is if the key is leaked; indeed, the lemma does hold.
